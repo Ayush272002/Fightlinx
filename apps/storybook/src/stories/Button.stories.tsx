@@ -1,4 +1,4 @@
-import type { Meta, StoryObj } from "@storybook/react";
+import { Meta, StoryObj } from "@storybook/react";
 import { Button } from "@repo/ui";
 
 // Meta configuration for the Button component
@@ -11,61 +11,79 @@ const meta: Meta<typeof Button> = {
   tags: ["autodocs"],
   argTypes: {
     className: { control: "text" },
-    appName: { control: "text" },
     children: { control: "text" },
+    variant: {
+      control: {
+        type: "select",
+        options: [
+          "default",
+          "destructive",
+          "outline",
+          "secondary",
+          "ghost",
+          "link",
+        ],
+      },
+    },
+    size: {
+      control: {
+        type: "select",
+        options: ["default", "sm", "lg", "icon"],
+      },
+    },
+    asChild: { control: "boolean" },
   },
 };
 
 export default meta;
+
 type Story = StoryObj<typeof Button>;
 
 export const Primary: Story = {
   args: {
-    appName: "Storybook",
-    className: "px-4 py-2 text-white bg-blue-500 hover:bg-blue-700 rounded-lg",
-    children: "Click me!",
+    variant: "default", // Using variant prop
+    size: "default", // Using size prop
+    children: "Click me!", // Button text
   },
 };
 
 export const Secondary: Story = {
   args: {
-    appName: "Docs",
-    className: "px-4 py-2 text-white bg-gray-500 hover:bg-gray-700 rounded-lg",
+    variant: "secondary", // Using variant prop
+    size: "default",
     children: "Secondary Button",
   },
 };
 
 export const Large: Story = {
   args: {
-    appName: "LargeApp",
-    className:
-      "px-6 py-3 text-white text-xl bg-green-500 hover:bg-green-700 rounded-lg",
+    variant: "default",
+    size: "lg", // Using size prop
     children: "Large Button",
   },
 };
 
 export const Small: Story = {
   args: {
-    appName: "SmallApp",
-    className:
-      "px-2 py-1 text-sm text-white bg-red-500 hover:bg-red-700 rounded-md",
+    variant: "default",
+    size: "sm", // Using size prop
     children: "Small Button",
   },
 };
 
 export const Disabled: Story = {
   args: {
-    appName: "DisabledApp",
-    className: "px-4 py-2 text-white bg-gray-300 cursor-not-allowed rounded-lg",
+    variant: "default",
+    size: "default",
     children: "Disabled Button",
+    disabled: true, // Disable the button
   },
 };
 
 export const Custom: Story = {
   args: {
-    appName: "CustomApp",
-    className:
-      "px-4 py-2 bg-gradient-to-r from-pink-500 to-yellow-500 text-white hover:from-yellow-500 hover:to-pink-500 rounded-lg shadow-lg",
+    variant: "outline", // Example of using an outline variant
+    size: "default",
     children: "Custom Styled Button",
   },
 };
