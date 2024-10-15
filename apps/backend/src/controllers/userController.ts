@@ -1,8 +1,8 @@
-import prisma from "@repo/db/client";
-import { SigninSchema, SignupSchema } from "@repo/zodtypes/user-types";
-import { Request, Response } from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import prisma from '@repo/db/client';
+import { SigninSchema, SignupSchema } from '@repo/zodtypes/user-types';
+import { Request, Response } from 'express';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 const createUser = async (req: Request, res: Response) => {
   try {
@@ -11,7 +11,7 @@ const createUser = async (req: Request, res: Response) => {
 
     if (!parsedData.success) {
       return res.status(411).json({
-        message: parsedData.error.errors.map((err) => err.message).join(", "),
+        message: parsedData.error.errors.map((err) => err.message).join(', '),
       });
     }
 
@@ -23,7 +23,7 @@ const createUser = async (req: Request, res: Response) => {
 
     if (userExists) {
       return res.status(403).json({
-        message: "User already exists",
+        message: 'User already exists',
       });
     }
 
@@ -41,7 +41,7 @@ const createUser = async (req: Request, res: Response) => {
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       return res.status(500).json({
-        message: "Internal server error: JWT secret is not defined",
+        message: 'Internal server error: JWT secret is not defined',
       });
     }
     const token = jwt.sign(
@@ -49,7 +49,7 @@ const createUser = async (req: Request, res: Response) => {
         id: user.id,
       },
       jwtSecret,
-      { expiresIn: "7d" },
+      { expiresIn: '7d' }
     );
 
     return res.status(200).json({
@@ -58,7 +58,7 @@ const createUser = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      message: "Internal server error",
+      message: 'Internal server error',
     });
   }
 };
@@ -69,7 +69,7 @@ const signin = async (req: Request, res: Response) => {
 
   if (!parsedData.success) {
     return res.status(411).json({
-      message: parsedData.error.errors.map((err) => err.message).join(", "),
+      message: parsedData.error.errors.map((err) => err.message).join(', '),
     });
   }
 
@@ -81,18 +81,18 @@ const signin = async (req: Request, res: Response) => {
 
   if (!user) {
     return res.status(403).json({
-      message: "User not found",
+      message: 'User not found',
     });
   }
 
   const isPasswordValid = await bcrypt.compare(
     parsedData.data.password,
-    user.password,
+    user.password
   );
 
   if (!isPasswordValid) {
     return res.status(403).json({
-      message: "Invalid credentials",
+      message: 'Invalid credentials',
     });
   }
 
@@ -100,7 +100,7 @@ const signin = async (req: Request, res: Response) => {
   const jwtSecret = process.env.JWT_SECRET;
   if (!jwtSecret) {
     return res.status(500).json({
-      message: "Internal server error: JWT secret is not defined",
+      message: 'Internal server error: JWT secret is not defined',
     });
   }
   const token = jwt.sign(
@@ -108,7 +108,7 @@ const signin = async (req: Request, res: Response) => {
       id: user.id,
     },
     jwtSecret,
-    { expiresIn: "7d" },
+    { expiresIn: '7d' }
   );
 
   return res.status(200).json({

@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Calendar, Users, Trophy, Zap } from "lucide-react";
-import { motion } from "framer-motion";
+import { useState } from 'react';
+import { Calendar, Users, Trophy, Zap } from 'lucide-react';
+import { motion } from 'framer-motion';
 import {
   Button,
   Input,
@@ -11,15 +11,15 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@repo/ui";
-import { useRouter } from "next/navigation";
+} from '@repo/ui';
+import { useRouter } from 'next/navigation';
 
 export default function LandingPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState('');
 
   const getStartedHandler = () => {
-    router.push("/signup");
+    router.push('/signup');
   };
 
   return (
@@ -37,7 +37,7 @@ export default function LandingPage() {
           </span>
         </motion.a>
         <nav className="ml-auto flex gap-4 sm:gap-6">
-          {["Features", "Pricing", "About", "Contact"].map((item) => (
+          {['Features', 'Pricing', 'About', 'Contact'].map((item) => (
             <motion.a
               key={item}
               className="text-sm font-medium hover:text-red-500 transition-colors"
@@ -61,7 +61,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.5 }}
               >
                 <h1 className="text-4xl font-bold tracking-tighter sm:text-5xl md:text-6xl lg:text-7xl/none">
-                  Simplify Fight Events with{" "}
+                  Simplify Fight Events with{' '}
                   <span className="text-red-500">AI-Powered Matchmaking</span>
                 </h1>
                 <p className="mx-auto max-w-[700px] text-xl text-gray-400 md:text-2xl">
@@ -102,21 +102,21 @@ export default function LandingPage() {
               {[
                 {
                   icon: Users,
-                  title: "AI-Powered Matchmaking",
+                  title: 'AI-Powered Matchmaking',
                   description:
-                    "Find the perfect match for your fighters with our advanced AI algorithm.",
+                    'Find the perfect match for your fighters with our advanced AI algorithm.',
                 },
                 {
                   icon: Calendar,
-                  title: "Event Planning Tools",
+                  title: 'Event Planning Tools',
                   description:
-                    "Streamline your event planning process with our comprehensive toolset.",
+                    'Streamline your event planning process with our comprehensive toolset.',
                 },
                 {
                   icon: Trophy,
-                  title: "Fighter Network",
+                  title: 'Fighter Network',
                   description:
-                    "Connect with a vast network of fighters across various disciplines.",
+                    'Connect with a vast network of fighters across various disciplines.',
                 },
               ].map((feature, index) => (
                 <motion.div
@@ -210,7 +210,7 @@ export default function LandingPage() {
                 <form
                   onSubmit={(e) => {
                     e.preventDefault();
-                    console.log("Submitted email:", email);
+                    console.log('Submitted email:', email);
                     // TODO: send the email to your backend
                   }}
                 >

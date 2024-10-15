@@ -1,20 +1,20 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Button, Input, Label } from "@repo/ui";
-import { useState } from "react";
-import { toast } from "react-toastify";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Button, Input, Label } from '@repo/ui';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import axios from 'axios';
+import { useRouter } from 'next/navigation';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function SignUp() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const router = useRouter();
 
   const containerVariants = {
@@ -23,10 +23,10 @@ export default function SignUp() {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 100,
         damping: 15,
-        when: "beforeChildren",
+        when: 'beforeChildren',
         staggerChildren: 0.1,
       },
     },
@@ -37,19 +37,19 @@ export default function SignUp() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 100, damping: 15 },
+      transition: { type: 'spring', stiffness: 100, damping: 15 },
     },
   };
 
   const onSubmitHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!name || !email || !password || !passwordConfirm) {
-      toast.error("All fields are required");
+      toast.error('All fields are required');
       return;
     }
 
     if (password !== passwordConfirm) {
-      toast.error("Passwords do not match");
+      toast.error('Passwords do not match');
       return;
     }
 
@@ -62,25 +62,25 @@ export default function SignUp() {
 
       const res = await axios.post(
         `${API_BASE_URL}/api/v1/user/signup`,
-        payload,
+        payload
       );
 
       if (res.status === 200) {
-        localStorage.setItem("jwt", res.data.jwt);
-        router.push("/dashboard");
-        toast.success("Account created successfully");
+        localStorage.setItem('jwt', res.data.jwt);
+        router.push('/dashboard');
+        toast.success('Account created successfully');
       }
     } catch (error: any) {
       if (error.response) {
         toast.error(
           error.response.data.message ||
-            "Login failed. Please check your credentials and try again.",
+            'Login failed. Please check your credentials and try again.'
         );
       } else if (error.request) {
-        toast.error("No response from the server. Please try again later.");
+        toast.error('No response from the server. Please try again later.');
       } else {
         toast.error(
-          "An unexpected error occurred during login. Please try again.",
+          'An unexpected error occurred during login. Please try again.'
         );
       }
     }

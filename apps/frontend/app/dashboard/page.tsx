@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -9,8 +9,8 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-} from "recharts";
-import { Activity, Users, Calendar, TrendingUp, Edit } from "lucide-react";
+} from 'recharts';
+import { Activity, Users, Calendar, TrendingUp, Edit } from 'lucide-react';
 import {
   Button,
   Card,
@@ -30,64 +30,64 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@repo/ui";
+} from '@repo/ui';
 
 // Mock data
 const quickStats = {
   totalFighters: 1000,
   upcomingMatches: 50,
   recentSignups: 25,
-  matchmakingStatus: "Active",
+  matchmakingStatus: 'Active',
 };
 
 const recentActivity = [
-  { type: "Match", description: "John Doe vs Jane Smith - John Doe won by KO" },
-  { type: "Signup", description: "New fighter Mike Johnson joined" },
-  { type: "Match", description: "Alice Brown vs Eve Wilson - Draw" },
+  { type: 'Match', description: 'John Doe vs Jane Smith - John Doe won by KO' },
+  { type: 'Signup', description: 'New fighter Mike Johnson joined' },
+  { type: 'Match', description: 'Alice Brown vs Eve Wilson - Draw' },
 ];
 
 const fighterProfile = {
-  name: "John Doe",
+  name: 'John Doe',
   age: 28,
   height: 180,
   weight: 77,
   reach: 188,
-  style: "Mixed Martial Arts",
-  gym: "Elite Fight Club",
+  style: 'Mixed Martial Arts',
+  gym: 'Elite Fight Club',
   record: { wins: 10, losses: 2, draws: 1 },
 };
 
 const performanceData = [
-  { month: "Jan", wins: 1, losses: 0 },
-  { month: "Feb", wins: 1, losses: 1 },
-  { month: "Mar", wins: 2, losses: 0 },
-  { month: "Apr", wins: 1, losses: 1 },
-  { month: "May", wins: 2, losses: 0 },
+  { month: 'Jan', wins: 1, losses: 0 },
+  { month: 'Feb', wins: 1, losses: 1 },
+  { month: 'Mar', wins: 2, losses: 0 },
+  { month: 'Apr', wins: 1, losses: 1 },
+  { month: 'May', wins: 2, losses: 0 },
 ];
 
 const matchCandidates = [
-  { name: "Mike Johnson", compatibilityScore: 95 },
-  { name: "Sarah Lee", compatibilityScore: 88 },
-  { name: "Tom Wilson", compatibilityScore: 82 },
+  { name: 'Mike Johnson', compatibilityScore: 95 },
+  { name: 'Sarah Lee', compatibilityScore: 88 },
+  { name: 'Tom Wilson', compatibilityScore: 82 },
 ];
 
 const upcomingMatches = [
   {
-    opponent: "Mike Johnson",
-    date: "2023-07-15",
-    time: "20:00",
-    location: "Las Vegas Arena",
+    opponent: 'Mike Johnson',
+    date: '2023-07-15',
+    time: '20:00',
+    location: 'Las Vegas Arena',
   },
   {
-    opponent: "Sarah Lee",
-    date: "2023-08-02",
-    time: "19:30",
-    location: "New York Stadium",
+    opponent: 'Sarah Lee',
+    date: '2023-08-02',
+    time: '19:30',
+    location: 'New York Stadium',
   },
 ];
 
 export default function Dashboard() {
-  const [activeTab, setActiveTab] = useState("overview");
+  const [activeTab, setActiveTab] = useState('overview');
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
@@ -183,7 +183,7 @@ export default function Dashboard() {
               <ul className="space-y-2">
                 {recentActivity.map((activity, index) => (
                   <li key={index} className="flex items-center space-x-2">
-                    {activity.type === "Match" ? (
+                    {activity.type === 'Match' ? (
                       <Activity className="text-red-400" />
                     ) : (
                       <Users className="text-red-400" />
@@ -262,12 +262,12 @@ export default function Dashboard() {
               <ChartContainer
                 config={{
                   wins: {
-                    label: "Wins",
-                    color: "#ff4136",
+                    label: 'Wins',
+                    color: '#ff4136',
                   },
                   losses: {
-                    label: "Losses",
-                    color: "#0074d9",
+                    label: 'Losses',
+                    color: '#0074d9',
                   },
                 }}
                 className="h-[300px]"
@@ -280,21 +280,21 @@ export default function Dashboard() {
                     <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                     <XAxis
                       dataKey="month"
-                      tick={{ fill: "#fff" }}
+                      tick={{ fill: '#fff' }}
                       label={{
-                        value: "Month",
-                        position: "insideBottom",
+                        value: 'Month',
+                        position: 'insideBottom',
                         offset: -5,
-                        fill: "#fff",
+                        fill: '#fff',
                       }}
                     />
                     <YAxis
-                      tick={{ fill: "#fff" }}
+                      tick={{ fill: '#fff' }}
                       label={{
-                        value: "Count",
+                        value: 'Count',
                         angle: -90,
-                        position: "insideLeft",
-                        fill: "#fff",
+                        position: 'insideLeft',
+                        fill: '#fff',
                       }}
                     />
                     <ChartTooltip content={<ChartTooltipContent />} />

@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { motion } from "framer-motion";
-import { Button, Input, Label } from "@repo/ui";
-import { useState } from "react";
-import axios from "axios";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
+import Link from 'next/link';
+import { motion } from 'framer-motion';
+import { Button, Input, Label } from '@repo/ui';
+import { useState } from 'react';
+import axios from 'axios';
+import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -19,10 +19,10 @@ export default function SignIn() {
       opacity: 1,
       y: 0,
       transition: {
-        type: "spring",
+        type: 'spring',
         stiffness: 100,
         damping: 15,
-        when: "beforeChildren",
+        when: 'beforeChildren',
         staggerChildren: 0.1,
       },
     },
@@ -33,17 +33,17 @@ export default function SignIn() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { type: "spring", stiffness: 100, damping: 15 },
+      transition: { type: 'spring', stiffness: 100, damping: 15 },
     },
   };
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
 
   const submitForm = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!email || !password) {
-      return toast.error("Email and password are required");
+      return toast.error('Email and password are required');
     }
 
     try {
@@ -53,19 +53,19 @@ export default function SignIn() {
       });
 
       if (response.status === 200) {
-        localStorage.setItem("jwt", response.data.jwt);
-        router.push("/dashboard");
-        toast.success("Sign in successful");
+        localStorage.setItem('jwt', response.data.jwt);
+        router.push('/dashboard');
+        toast.success('Sign in successful');
       } else {
-        toast.error(response.data.error || "Something went wrong");
+        toast.error(response.data.error || 'Something went wrong');
       }
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
       } else {
-        toast.error("An error occurred during sign in. Please try again.");
+        toast.error('An error occurred during sign in. Please try again.');
       }
-      console.error("Signin error:", error);
+      console.error('Signin error:', error);
     }
   };
 
