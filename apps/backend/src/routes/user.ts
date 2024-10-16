@@ -1,6 +1,11 @@
 import { Router } from 'express';
-// import { authMiddleware } from "../middlewares/authMiddleware";
-import { createUser, signin } from '../controllers/userController';
+import {
+  createUser,
+  getProfile,
+  signin,
+  updateUser,
+} from '../controllers/userController';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const router = Router();
 
@@ -8,6 +13,8 @@ router.post('/signup', createUser);
 
 router.post('/signin', signin);
 
-// router.get("/", authMiddleware, getUser);
+router.post('/update', authMiddleware, updateUser);
+
+router.get('/profile', authMiddleware, getProfile);
 
 export const userRouter = router;

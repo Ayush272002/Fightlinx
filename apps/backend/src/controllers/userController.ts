@@ -38,6 +38,21 @@ const createUser = async (req: Request, res: Response) => {
       },
     });
 
+    // Create a fighter profile for the user with default or initial values
+    await prisma.fighter.create({
+      data: {
+        name: user.name,
+        age: 18,
+        heightCm: 0,
+        reachCm: 0,
+        gender: 'Unknown',
+        weightKg: 0,
+        fightingStyle: 'Unknown',
+        gym: 'None',
+        userId: user.id,
+      },
+    });
+
     const jwtSecret = process.env.JWT_SECRET;
     if (!jwtSecret) {
       return res.status(500).json({
@@ -116,4 +131,108 @@ const signin = async (req: Request, res: Response) => {
   });
 };
 
-export { createUser, signin };
+const updateUser = async (req: Request, res: Response) => {
+  try {
+    const userId = req.body.userId;
+
+    if (!userId) {
+      return res.status(403).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const fighter = await prisma.fighter.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!fighter) {
+      return res.status(404).json({
+        message: 'Fighter profile not found',
+      });
+    }
+
+    const {
+      name,
+      age,
+      heightCm,
+      reachCm,
+      weightKg,
+      fightingStyle,
+      gym,
+      gender,
+    } = req.body.payload;
+
+    // console.log(req.body);
+
+    await prisma.fighter.update({
+      where: {
+        id: fighter.id,
+      },
+      data: {
+        name: name,
+        age: Number(age),
+        heightCm: Number(heightCm),
+        reachCm: Number(reachCm),
+        gender: gender,
+        weightKg: Number(weightKg),
+        fightingStyle: fightingStyle,
+        gym: gym,
+      },
+    });
+
+    return res.status(200).json({
+      message: 'Fighter profile updated',
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};
+
+const getProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = req.body.userId;
+
+    if (!userId) {
+      return res.status(403).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const fighter = await prisma.fighter.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!fighter) {
+      return res.status(404).json({
+        message: 'Fighter profile not found',
+      });
+    }
+
+    return res.status(200).json({
+      data: {
+        name: fighter.name,
+        age: fighter.age,
+        gender: fighter.gender,
+        height: fighter.heightCm,
+        weight: fighter.weightKg,
+        reach: fighter.reachCm,
+        style: fighter.fightingStyle,
+        gym: fighter.gym,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};
+
+export { createUser, signin, updateUser, getProfile };

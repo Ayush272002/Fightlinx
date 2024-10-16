@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   BarChart,
   Bar,
@@ -31,8 +31,13 @@ import {
   TabsList,
   TabsTrigger,
 } from '@repo/ui';
+import { EditProfilePopup } from 'components/EditProfilePopup';
+import axios from 'axios';
+import { toast } from 'react-toastify';
 
-// Mock data
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+
+// Mock data (replace with actual API calls in a real application)
 const quickStats = {
   totalFighters: 1000,
   upcomingMatches: 50,
@@ -45,17 +50,6 @@ const recentActivity = [
   { type: 'Signup', description: 'New fighter Mike Johnson joined' },
   { type: 'Match', description: 'Alice Brown vs Eve Wilson - Draw' },
 ];
-
-const fighterProfile = {
-  name: 'John Doe',
-  age: 28,
-  height: 180,
-  weight: 77,
-  reach: 188,
-  style: 'Mixed Martial Arts',
-  gym: 'Elite Fight Club',
-  record: { wins: 10, losses: 2, draws: 1 },
-};
 
 const performanceData = [
   { month: 'Jan', wins: 1, losses: 0 },
@@ -86,8 +80,89 @@ const upcomingMatches = [
   },
 ];
 
+interface FighterProfile {
+  name: string;
+  age: number;
+  gender: string;
+  height: number;
+  weight: number;
+  reach: number;
+  style: string;
+  gym: string;
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const [profile, setProfile] = useState<FighterProfile | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/v1/user/profile`,
+          {
+            headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
+          }
+        );
+
+        if (response.status === 200) {
+          const profileData = response.data.data;
+          console.log('Profile data:', profileData);
+          setProfile(profileData);
+        }
+      } catch (e) {
+        console.error('Profile fetch error:', e);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleEditProfile = () => {
+    setIsEditProfileOpen(true);
+  };
+
+  const handleSaveProfile = async (updatedProfile: FighterProfile) => {
+    setProfile(updatedProfile);
+    setIsEditProfileOpen(false);
+
+    try {
+      const payload = {
+        name: updatedProfile.name,
+        age: updatedProfile.age,
+        heightCm: updatedProfile.height,
+        reachCm: updatedProfile.reach,
+        weightKg: updatedProfile.weight,
+        fightingStyle: updatedProfile.style,
+        gym: updatedProfile.gym,
+        gender: updatedProfile.gender,
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/user/update`,
+        {
+          payload,
+        },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
+        }
+      );
+
+      if (response.status === 200) {
+        toast.success('Updated successful');
+      } else {
+        toast.error(response.data.error || 'Something went wrong');
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error('An error occurred during update. Please try again.');
+      }
+      console.error('Update error:', error);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-black text-white p-8">
@@ -100,34 +175,34 @@ export default function Dashboard() {
         onValueChange={setActiveTab}
         className="space-y-4"
       >
-        <TabsList className="bg-gray-800">
+        <TabsList className="bg-gray-800 rounded">
           <TabsTrigger
             value="overview"
-            className="data-[state=active]:bg-red-600"
+            className="data-[state=active]:bg-red-600 rounded"
           >
             Overview
           </TabsTrigger>
           <TabsTrigger
             value="profile"
-            className="data-[state=active]:bg-red-600"
+            className="data-[state=active]:bg-red-600 rounded"
           >
             Profile
           </TabsTrigger>
           <TabsTrigger
             value="matchmaking"
-            className="data-[state=active]:bg-red-600"
+            className="data-[state=active]:bg-red-600 rounded"
           >
             Matchmaking
           </TabsTrigger>
           <TabsTrigger
             value="scheduled"
-            className="data-[state=active]:bg-red-600"
+            className="data-[state=active]:bg-red-600 rounded"
           >
             Scheduled Matches
           </TabsTrigger>
           <TabsTrigger
             value="analytics"
-            className="data-[state=active]:bg-red-600"
+            className="data-[state=active]:bg-red-600 rounded"
           >
             Analytics
           </TabsTrigger>
@@ -135,7 +210,7 @@ export default function Dashboard() {
 
         <TabsContent value="overview" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            <Card className="bg-gray-900 border-red-600">
+            <Card className="bg-gray-900 border-red-600 rounded">
               <CardHeader>
                 <CardTitle className="text-red-400">Total Fighters</CardTitle>
               </CardHeader>
@@ -143,7 +218,7 @@ export default function Dashboard() {
                 <p className="text-2xl font-bold">{quickStats.totalFighters}</p>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-red-600">
+            <Card className="bg-gray-900 border-red-600 rounded">
               <CardHeader>
                 <CardTitle className="text-red-400">Upcoming Matches</CardTitle>
               </CardHeader>
@@ -153,7 +228,7 @@ export default function Dashboard() {
                 </p>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-red-600">
+            <Card className="bg-gray-900 border-red-600 rounded">
               <CardHeader>
                 <CardTitle className="text-red-400">Recent Sign-ups</CardTitle>
               </CardHeader>
@@ -161,7 +236,7 @@ export default function Dashboard() {
                 <p className="text-2xl font-bold">{quickStats.recentSignups}</p>
               </CardContent>
             </Card>
-            <Card className="bg-gray-900 border-red-600">
+            <Card className="bg-gray-900 border-red-600 rounded">
               <CardHeader>
                 <CardTitle className="text-red-400">
                   Matchmaking Status
@@ -175,7 +250,7 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">Recent Activity</CardTitle>
             </CardHeader>
@@ -196,20 +271,23 @@ export default function Dashboard() {
           </Card>
 
           <div className="flex space-x-4">
-            <Button className="bg-red-600 hover:bg-red-700">
+            <Button className="bg-red-600 hover:bg-red-700 rounded">
               Find a Match
             </Button>
-            <Button className="bg-red-600 hover:bg-red-700">
+            <Button
+              className="bg-red-600 hover:bg-red-700 rounded"
+              onClick={handleEditProfile}
+            >
               Edit Profile
             </Button>
-            <Button className="bg-red-600 hover:bg-red-700">
+            <Button className="bg-red-600 hover:bg-red-700 rounded">
               View Match History
             </Button>
           </div>
         </TabsContent>
 
         <TabsContent value="profile" className="space-y-4">
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">Fighter Profile</CardTitle>
             </CardHeader>
@@ -217,42 +295,46 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p>
-                    <strong>Name:</strong> {fighterProfile.name}
+                    <strong>Name:</strong> {profile?.name || 'N/A'}
                   </p>
                   <p>
-                    <strong>Age:</strong> {fighterProfile.age}
+                    <strong>Age:</strong> {profile?.age || 'N/A'}
                   </p>
                   <p>
-                    <strong>Height:</strong> {fighterProfile.height} cm
+                    <strong>Gender:</strong> {profile?.gender || 'N/A'}
                   </p>
                   <p>
-                    <strong>Weight:</strong> {fighterProfile.weight} kg
+                    <strong>Height:</strong>{' '}
+                    {profile?.height ? `${profile.height} cm` : 'N/A'}
+                  </p>
+                  <p>
+                    <strong>Weight:</strong>{' '}
+                    {profile?.weight ? `${profile.weight} kg` : 'N/A'}
                   </p>
                 </div>
                 <div>
                   <p>
-                    <strong>Reach:</strong> {fighterProfile.reach} cm
+                    <strong>Reach:</strong>{' '}
+                    {profile?.reach ? `${profile.reach} cm` : 'N/A'}
                   </p>
                   <p>
-                    <strong>Style:</strong> {fighterProfile.style}
+                    <strong>Style:</strong> {profile?.style || 'N/A'}
                   </p>
                   <p>
-                    <strong>Gym:</strong> {fighterProfile.gym}
-                  </p>
-                  <p>
-                    <strong>Record:</strong> {fighterProfile.record.wins}W-
-                    {fighterProfile.record.losses}L-
-                    {fighterProfile.record.draws}D
+                    <strong>Gym:</strong> {profile?.gym || 'N/A'}
                   </p>
                 </div>
               </div>
-              <Button className="mt-4 bg-red-600 hover:bg-red-700">
+              <Button
+                className="mt-4 bg-red-600 hover:bg-red-700 rounded"
+                onClick={handleEditProfile}
+              >
                 <Edit className="mr-2 h-4 w-4" /> Edit Profile
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-800 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">
                 Performance Insights
@@ -273,16 +355,13 @@ export default function Dashboard() {
                 className="h-[300px]"
               >
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart
-                    data={performanceData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                  >
+                  <BarChart data={performanceData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#444" />
                     <XAxis
                       dataKey="month"
                       tick={{ fill: '#fff' }}
                       label={{
-                        value: 'Month',
+                        value: 'Months',
                         position: 'insideBottom',
                         offset: -5,
                         fill: '#fff',
@@ -308,18 +387,18 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="matchmaking" className="space-y-4">
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">Find a Match</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button className="bg-red-600 hover:bg-red-700">
+              <Button className="bg-red-600 hover:bg-red-700 rounded">
                 Start Matchmaking
               </Button>
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">Match Candidates</CardTitle>
             </CardHeader>
@@ -340,7 +419,7 @@ export default function Dashboard() {
                       <TableCell>{candidate.name}</TableCell>
                       <TableCell>{candidate.compatibilityScore}%</TableCell>
                       <TableCell>
-                        <Button className="bg-red-600 hover:bg-red-700">
+                        <Button className="bg-red-600 hover:bg-red-700 rounded">
                           View Profile
                         </Button>
                       </TableCell>
@@ -353,7 +432,7 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="scheduled" className="space-y-4">
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">Upcoming Matches</CardTitle>
             </CardHeader>
@@ -376,7 +455,7 @@ export default function Dashboard() {
                       <TableCell>{match.time}</TableCell>
                       <TableCell>{match.location}</TableCell>
                       <TableCell>
-                        <Button className="bg-red-600 hover:bg-red-700">
+                        <Button className="bg-red-600 hover:bg-red-700 rounded">
                           View Details
                         </Button>
                       </TableCell>
@@ -389,7 +468,7 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">
                 Performance Metrics
@@ -403,7 +482,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-red-600">
+          <Card className="bg-gray-900 border-red-600 rounded">
             <CardHeader>
               <CardTitle className="text-red-400">Leaderboard</CardTitle>
             </CardHeader>
@@ -413,6 +492,15 @@ export default function Dashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      {profile && (
+        <EditProfilePopup
+          isOpen={isEditProfileOpen}
+          onClose={() => setIsEditProfileOpen(false)}
+          onSave={handleSaveProfile}
+          initialProfile={profile}
+        />
+      )}
     </div>
   );
 }
