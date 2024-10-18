@@ -18,6 +18,8 @@
     "@types/jsonwebtoken": "^9.0.7"
   },
   "dependencies": {
+    "@repo/kafka": "*",
+    "@repo/topics": "*",
     "@repo/db": "*",
     "@repo/zodtypes": "*",
     "@types/cookie-parser": "^1.4.7",

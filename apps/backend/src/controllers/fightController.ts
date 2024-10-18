@@ -1,4 +1,6 @@
 import prisma from '@repo/db/client';
+import kafkaClient from '@repo/kafka/client';
+import { MATCHMAKING } from '@repo/topics/topic';
 import { Request, Response } from 'express';
 
 const getRecentFights = async (req: Request, res: Response) => {
@@ -66,4 +68,40 @@ const getRecentFights = async (req: Request, res: Response) => {
   }
 };
 
-export { getRecentFights };
+const initiateMatchmaking = async (req: Request, res: Response) => {
+  try {
+    const admin = kafkaClient.admin();
+    await admin.connect();
+
+    const topics = await admin.listTopics();
+    if (!topics.includes(MATCHMAKING)) {
+      console.log(`Creating topic "${MATCHMAKING}" as it doesn't exist.`);
+      await admin.createTopics({
+        topics: [
+          {
+            topic: MATCHMAKING,
+            numPartitions: 1,
+            replicationFactor: 1,
+          },
+        ],
+      });
+    }
+
+    const producer = kafkaClient.producer();
+    await producer.connect();
+
+    producer.send({
+      topic: MATCHMAKING,
+      messages: [{ value: 'Hello from the backend!!!!' }],
+    });
+
+    return res.status(202).json({ message: 'Matchmaking initiated' });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};
+
+export { getRecentFights, initiateMatchmaking };
