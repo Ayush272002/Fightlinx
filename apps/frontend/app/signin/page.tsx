@@ -47,13 +47,17 @@ export default function SignIn() {
     }
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/api/v1/user/signin`, {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/user/signin`,
+        {
+          email,
+          password,
+        },
+        { withCredentials: true }
+      );
 
       if (response.status === 200) {
-        localStorage.setItem('jwt', response.data.jwt);
+        // localStorage.setItem('jwt', response.data.jwt);
         router.push('/dashboard');
         toast.success('Sign in successful');
       } else {

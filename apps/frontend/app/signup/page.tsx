@@ -62,11 +62,11 @@ export default function SignUp() {
 
       const res = await axios.post(
         `${API_BASE_URL}/api/v1/user/signup`,
-        payload
+        payload,
+        { withCredentials: true }
       );
 
       if (res.status === 200) {
-        localStorage.setItem('jwt', res.data.jwt);
         router.push('/dashboard');
         toast.success('Account created successfully');
       }

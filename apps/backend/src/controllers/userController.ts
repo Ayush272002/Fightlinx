@@ -38,7 +38,6 @@ const createUser = async (req: Request, res: Response) => {
       },
     });
 
-    // Create a fighter profile for the user with default or initial values
     await prisma.fighter.create({
       data: {
         name: user.name,
@@ -66,6 +65,13 @@ const createUser = async (req: Request, res: Response) => {
       jwtSecret,
       { expiresIn: '7d' }
     );
+
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
 
     return res.status(200).json({
       jwt: token,
@@ -125,6 +131,13 @@ const signin = async (req: Request, res: Response) => {
     jwtSecret,
     { expiresIn: '7d' }
   );
+
+  res.cookie('jwt', token, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'strict',
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
 
   return res.status(200).json({
     jwt: token,

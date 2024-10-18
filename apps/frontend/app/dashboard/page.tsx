@@ -101,9 +101,7 @@ export default function Dashboard() {
       try {
         const response = await axios.get(
           `${API_BASE_URL}/api/v1/user/profile`,
-          {
-            headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
-          }
+          { withCredentials: true }
         );
 
         if (response.status === 200) {
