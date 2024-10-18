@@ -35,7 +35,8 @@ model Fighter {
   gym           String // Fighter's training gym
   user          User        @relation("UserFighters", fields: [userId], references: [id])
   userId        Int
-  fightStats    FightStat[] @relation("FighterFightStats")
+  fightStatsF1  FightStat[] @relation("FighterFightStatsF1") // For fighter1 relation
+  fightStatsF2  FightStat[] @relation("FighterFightStatsF2") // For fighter2 relation
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 }
@@ -45,8 +46,10 @@ model FightStat {
   fightId              Int
   event                String
   location             String
-  fighter1Name         String
-  fighter2Name         String
+  fighter1Id           Int
+  fighter2Id           Int
+  fighter1             Fighter  @relation("FighterFightStatsF1", fields: [fighter1Id], references: [id]) // Relation for fighter1
+  fighter2             Fighter  @relation("FighterFightStatsF2", fields: [fighter2Id], references: [id]) // Relation for fighter2
   fighter1Age          Int
   fighter2Age          Int
   fighter1HeightCm     Float
@@ -73,8 +76,7 @@ model FightStat {
   takedownsLandedF2    Int
   knockdownsF1         Int
   knockdownsF2         Int
-  fighter              Fighter  @relation("FighterFightStats", fields: [fighterId], references: [id])
-  fighterId            Int
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 }
+

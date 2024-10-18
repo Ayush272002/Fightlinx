@@ -37,20 +37,7 @@ import { toast } from 'react-toastify';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
-// Mock data (replace with actual API calls in a real application)
-const quickStats = {
-  totalFighters: 1000,
-  upcomingMatches: 50,
-  recentSignups: 25,
-  matchmakingStatus: 'Active',
-};
-
-const recentActivity = [
-  { type: 'Match', description: 'John Doe vs Jane Smith - John Doe won by KO' },
-  { type: 'Signup', description: 'New fighter Mike Johnson joined' },
-  { type: 'Match', description: 'Alice Brown vs Eve Wilson - Draw' },
-];
-
+// Mock data
 const performanceData = [
   { month: 'Jan', wins: 1, losses: 0 },
   { month: 'Feb', wins: 1, losses: 1 },
@@ -91,10 +78,37 @@ interface FighterProfile {
   gym: string;
 }
 
+interface Activity {
+  fighter1: {
+    name: string;
+  };
+  fighter2: {
+    name: string;
+  };
+  winner: string;
+  outcome: string;
+  method: string;
+  event: string;
+}
+
+interface QuickStats {
+  totalFighters: number;
+  recentSignups: number;
+  // upcomingMatches: number,
+  // matchmakingStatus: number,
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [profile, setProfile] = useState<FighterProfile | null>(null);
+  const [recentActivity, setRecentActivity] = useState<Activity[]>([]);
+  const [quickStats, setQuickStats] = useState<QuickStats>({
+    totalFighters: 0,
+    recentSignups: 0,
+    // upcomingMatches: 0,
+    // matchmakingStatus: 0,
+  });
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -106,7 +120,7 @@ export default function Dashboard() {
 
         if (response.status === 200) {
           const profileData = response.data.data;
-          console.log('Profile data:', profileData);
+          // console.log('Profile data:', profileData);
           setProfile(profileData);
         }
       } catch (e) {
@@ -114,7 +128,43 @@ export default function Dashboard() {
       }
     };
 
+    const getRecentActivity = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/v1/fight/recentActivity`,
+          { withCredentials: true }
+        );
+
+        if (response.status === 200) {
+          const activityData = response.data.data;
+          setRecentActivity(activityData);
+          // console.log('Recent activity:', activityData);
+        }
+      } catch (e) {
+        console.error('Recent activity fetch error:', e);
+      }
+    };
+
+    const fetchQuickStats = async () => {
+      try {
+        const response = await axios.get(
+          `${API_BASE_URL}/api/v1/user/quickStats`,
+          { withCredentials: true }
+        );
+
+        if (response.status === 200) {
+          const stats = response.data.data;
+          // console.log('Quick stats:', stats);
+          setQuickStats(stats);
+        }
+      } catch (e) {
+        console.error('Quick stats fetch error:', e);
+      }
+    };
+
     fetchProfile();
+    getRecentActivity();
+    fetchQuickStats();
   }, []);
 
   const handleEditProfile = () => {
@@ -222,13 +272,16 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">
-                  {quickStats.upcomingMatches}
+                  {/* {quickStats.upcomingMatches} */}
+                  50
                 </p>
               </CardContent>
             </Card>
             <Card className="bg-gray-900 border-red-600 rounded">
               <CardHeader>
-                <CardTitle className="text-red-400">Recent Sign-ups</CardTitle>
+                <CardTitle className="text-red-400">
+                  Recent Sign-ups (last 7d)
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">{quickStats.recentSignups}</p>
@@ -242,7 +295,8 @@ export default function Dashboard() {
               </CardHeader>
               <CardContent>
                 <p className="text-2xl font-bold">
-                  {quickStats.matchmakingStatus}
+                  {/* {quickStats.matchmakingStatus} */}
+                  Active
                 </p>
               </CardContent>
             </Card>
@@ -254,16 +308,39 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <ul className="space-y-2">
-                {recentActivity.map((activity, index) => (
-                  <li key={index} className="flex items-center space-x-2">
-                    {activity.type === 'Match' ? (
-                      <Activity className="text-red-400" />
-                    ) : (
-                      <Users className="text-red-400" />
-                    )}
-                    <span>{activity.description}</span>
-                  </li>
-                ))}
+                {recentActivity.length > 0 ? (
+                  recentActivity.map((activity, index) => (
+                    <li
+                      key={index}
+                      className="text-gray-300 flex justify-between items-center"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <Activity className="text-red-500 h-4 w-4" />
+                        <span>
+                          <strong>{activity.fighter1.name}</strong> vs{' '}
+                          <strong>{activity.fighter2.name}</strong> -
+                          <strong className="text-green-400">
+                            {' '}
+                            {activity.winner === 'Fighter 1'
+                              ? activity.fighter1.name
+                              : activity.winner === 'Fighter 2'
+                                ? activity.fighter2.name
+                                : activity.winner}
+                          </strong>{' '}
+                          won by{' '}
+                          <span className="text-red-400">
+                            {activity.method}
+                          </span>
+                        </span>
+                      </div>
+                      <span className="text-gray-400 text-sm">
+                        {activity.event}
+                      </span>
+                    </li>
+                  ))
+                ) : (
+                  <p className="text-gray-400">No recent activity available.</p>
+                )}
               </ul>
             </CardContent>
           </Card>

@@ -156,8 +156,8 @@ async function main() {
             fightId: parseInt(fight.Fight_ID.toString(), 10),
             event: fight.Event,
             location: fight.Location,
-            fighter1Name: fight.Fighter_1_Name,
-            fighter2Name: fight.Fighter_2_Name,
+            fighter1Id: fighter1.id, // Use fighter1Id
+            fighter2Id: fighter2.id, // Use fighter2Id
             fighter1Age: parseInt(fight.Fighter_1_Age.toString(), 10),
             fighter2Age: parseInt(fight.Fighter_2_Age.toString(), 10),
             fighter1HeightCm: parseFloat(
@@ -206,13 +206,8 @@ async function main() {
               fight['Takedowns_Landed (F2)'].toString(),
               10
             ),
-            knockdownsF1: parseInt(fight['Knockdowns (F1)'].toString(), 10), // Convert knockdowns to integer
-            knockdownsF2: parseInt(fight['Knockdowns (F2)'].toString(), 10), // Convert knockdowns to integer
-            fighter: {
-              connect: {
-                id: fighter1.id,
-              },
-            },
+            knockdownsF1: parseInt(fight['Knockdowns (F1)'].toString(), 10),
+            knockdownsF2: parseInt(fight['Knockdowns (F2)'].toString(), 10),
           },
         });
       }

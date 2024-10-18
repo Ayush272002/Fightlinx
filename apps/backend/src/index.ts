@@ -3,12 +3,23 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user';
+import { fightRouter } from './routes/fight';
 dotenv.config();
 
 const app = express();
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',')
+  : [];
+
 app.use(
   cors({
-    origin: 'http://localhost:3000',
+    origin: function (origin, callback) {
+      if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true,
   })
@@ -19,6 +30,7 @@ app.use(cookieParser());
 const PORT = process.env.PORT || 8000;
 
 app.use('/api/v1/user', userRouter);
+app.use('/api/v1/fight', fightRouter);
 
 //global catch
 app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {

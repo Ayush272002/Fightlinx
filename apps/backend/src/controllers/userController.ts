@@ -248,4 +248,40 @@ const getProfile = async (req: Request, res: Response) => {
   }
 };
 
-export { createUser, signin, updateUser, getProfile };
+const quickStats = async (req: Request, res: Response) => {
+  try {
+    const userId = req.body.userId;
+
+    if (!userId) {
+      return res.status(403).json({
+        message: 'Unauthorized',
+      });
+    }
+    const userCount = await prisma.user.count();
+
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+
+    const recentSignupsCount = await prisma.user.count({
+      where: {
+        createdAt: {
+          gte: sevenDaysAgo,
+        },
+      },
+    });
+
+    return res.status(200).json({
+      data: {
+        totalFighters: userCount,
+        recentSignups: recentSignupsCount,
+      },
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};
+
+export { createUser, signin, updateUser, getProfile, quickStats };

@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   createUser,
   getProfile,
+  quickStats,
   signin,
   updateUser,
 } from '../controllers/userController';
@@ -16,5 +17,7 @@ router.post('/signin', signin);
 router.post('/update', authMiddleware, updateUser);
 
 router.get('/profile', authMiddleware, getProfile);
+
+router.get('/quickStats', authMiddleware, quickStats);
 
 export const userRouter = router;
