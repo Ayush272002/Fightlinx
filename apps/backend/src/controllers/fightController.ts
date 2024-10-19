@@ -70,29 +70,44 @@ const getRecentFights = async (req: Request, res: Response) => {
 
 const initiateMatchmaking = async (req: Request, res: Response) => {
   try {
-    const admin = kafkaClient.admin();
-    await admin.connect();
-
-    const topics = await admin.listTopics();
-    if (!topics.includes(MATCHMAKING)) {
-      console.log(`Creating topic "${MATCHMAKING}" as it doesn't exist.`);
-      await admin.createTopics({
-        topics: [
-          {
-            topic: MATCHMAKING,
-            numPartitions: 1,
-            replicationFactor: 1,
-          },
-        ],
+    const userId = req.body.userId;
+    if (!userId) {
+      return res.status(403).json({
+        message: 'Unauthorized',
       });
     }
 
-    const producer = kafkaClient.producer();
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      return res.status(404).json({
+        message: 'User not found',
+      });
+    }
+
+    const fighter = await prisma.fighter.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!fighter) {
+      return res.status(404).json({
+        message: 'Fighter profile not found',
+      });
+    }
+
+    await kafkaClient.createTopic(MATCHMAKING);
+    const producer = kafkaClient.getInstance().producer();
     await producer.connect();
 
     producer.send({
       topic: MATCHMAKING,
-      messages: [{ value: 'Hello from the backend!!!!' }],
+      messages: [{ value: JSON.stringify({ userId: userId }) }],
     });
 
     return res.status(202).json({ message: 'Matchmaking initiated' });

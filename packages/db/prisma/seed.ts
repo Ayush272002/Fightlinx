@@ -151,6 +151,13 @@ async function main() {
           continue;
         }
 
+        const winnerName =
+          fight.Winner === 'Fighter 1'
+            ? fight.Fighter_1_Name
+            : fight.Winner === 'Fighter 2'
+              ? fight.Fighter_2_Name
+              : fight.Winner;
+
         await prisma.fightStat.create({
           data: {
             fightId: parseInt(fight.Fight_ID.toString(), 10),
@@ -188,7 +195,7 @@ async function main() {
             roundEnd: parseInt(fight.Round_End.toString(), 10),
             timeEnd: fight.Time_End,
             outcome: fight.Outcome,
-            winner: fight.Winner,
+            winner: winnerName,
             method: fight.Method,
             significantStrikesF1: parseInt(
               fight['Significant_Strikes_Landed (F1)'].toString(),

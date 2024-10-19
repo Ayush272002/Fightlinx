@@ -39,6 +39,8 @@ model Fighter {
   fightStatsF2  FightStat[] @relation("FighterFightStatsF2") // For fighter2 relation
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
+  upcomingMatchesF1  UpcomingMatch[] @relation("UpcomingMatchF1")
+  upcomingMatchesF2  UpcomingMatch[] @relation("UpcomingMatchF2")
 }
 
 model FightStat {
@@ -80,3 +82,14 @@ model FightStat {
   updatedAt            DateTime @updatedAt
 }
 
+model UpcomingMatch {
+  id              Int       @id @default(autoincrement())
+  fighter1Id      Int       
+  fighter2Id      Int       
+  fighter1        Fighter   @relation("UpcomingMatchF1", fields: [fighter1Id], references: [id])
+  fighter2        Fighter   @relation("UpcomingMatchF2", fields: [fighter2Id], references: [id])
+  status          String    // 'pending', 'completed', etc.
+  matchDate       DateTime? 
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
