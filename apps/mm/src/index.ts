@@ -1,7 +1,81 @@
 import kafkaClient from '@repo/kafka/client';
 import { MATCHMAKING } from '@repo/topics/topic';
-import * as tf from '@tensorflow/tfjs';
 import prisma from '@repo/db/client';
+import * as tf from '@tensorflow/tfjs';
+
+/*
+Matchmaking Process Details:
+
+1. Uses **Euclidean distance** in a **K-Nearest Neighbors (KNN)** style to compare fighters.
+   - Calculates the distance between the current fighter and potential opponents based on their physical attributes:
+     - Age
+     - Height
+     - Reach
+     - Weight
+
+2. Finds the **best match** by selecting the opponent with the **smallest distance** (i.e., the closest physical match).
+
+3. Creates a match with the selected opponent and sets the match status to **"pending"**.
+*/
+
+async function getLastAndUpcomingMatches(fighterId: number): Promise<any[]> {
+  const matches = await prisma.upcomingMatch.findMany({
+    where: {
+      AND: [
+        {
+          OR: [{ fighter1Id: fighterId }, { fighter2Id: fighterId }],
+        },
+        {
+          OR: [{ status: 'completed' }, { status: 'pending' }],
+        },
+      ],
+    },
+    orderBy: {
+      matchDate: 'desc',
+    },
+    take: 5,
+  });
+
+  return matches;
+}
+
+async function hasFoughtOrScheduledMatch(
+  fighter1Id: number,
+  fighter2Id: number
+): Promise<boolean> {
+  const lastMatches = await getLastAndUpcomingMatches(fighter1Id);
+
+  return lastMatches.some(
+    (match) =>
+      match.fighter1Id === fighter2Id || match.fighter2Id === fighter2Id
+  );
+}
+
+function getFighterTensor(fighter: any) {
+  return tf.tensor([
+    fighter.age,
+    fighter.heightCm,
+    fighter.reachCm,
+    fighter.weightKg,
+  ]);
+}
+
+function knnMatch(fighterTensor: tf.Tensor, opponents: any[]): any {
+  let bestMatch = null;
+  let bestScore = Infinity;
+
+  for (const opponent of opponents) {
+    const opponentTensor = getFighterTensor(opponent);
+    const distance = tf.norm(fighterTensor.sub(opponentTensor)).dataSync()[0];
+
+    if (distance !== undefined && distance < bestScore) {
+      bestScore = distance;
+      bestMatch = opponent;
+    }
+  }
+
+  return bestMatch;
+}
 
 async function initiateMatchmaking(userId: number) {
   const fighter = await prisma.fighter.findFirst({ where: { userId: userId } });
@@ -9,7 +83,6 @@ async function initiateMatchmaking(userId: number) {
     throw new Error('Fighter not found');
   }
   console.log(fighter.name);
-
   const potentialOpponents = await prisma.fighter.findMany({
     where: {
       id: { not: fighter.id },
@@ -17,25 +90,21 @@ async function initiateMatchmaking(userId: number) {
     },
   });
 
-  let bestMatch = null;
-  let bestScore = 0;
-
+  const validOpponents = [];
   for (const opponent of potentialOpponents) {
-    const hasRecentMatch = await checkRecentMatches(
-      fighter.id,
-      opponent.id,
-      10
-    );
-    if (hasRecentMatch) {
-      continue;
-    }
-
-    const score = await predictMatch(fighter, opponent);
-    if (score > bestScore) {
-      bestScore = score;
-      bestMatch = opponent;
+    const hasFought = await hasFoughtOrScheduledMatch(fighter.id, opponent.id);
+    if (!hasFought) {
+      validOpponents.push(opponent);
     }
   }
+
+  if (validOpponents.length === 0) {
+    console.log('No suitable match found');
+    return;
+  }
+
+  const fighterTensor = getFighterTensor(fighter);
+  const bestMatch = knnMatch(fighterTensor, validOpponents);
 
   if (bestMatch) {
     await prisma.upcomingMatch.create({
@@ -54,58 +123,10 @@ async function initiateMatchmaking(userId: number) {
   }
 }
 
-async function checkRecentMatches(
-  fighter1Id: number,
-  fighter2Id: number,
-  numMatches: number
-): Promise<boolean> {
-  const recentMatches = await prisma.upcomingMatch.findMany({
-    where: {
-      OR: [
-        { fighter1Id: fighter1Id, fighter2Id: fighter2Id },
-        { fighter1Id: fighter2Id, fighter2Id: fighter1Id },
-      ],
-      status: 'completed',
-    },
-    orderBy: { matchDate: 'desc' },
-    take: numMatches,
-  });
-
-  return recentMatches.length > 0;
-}
-
-async function predictMatch(fighter1: any, fighter2: any): Promise<number> {
-  const ageWeight = 0.2;
-  const heightWeight = 0.2;
-  const reachWeight = 0.2;
-  const weightWeight = 0.2;
-  const experienceWeight = 0.2;
-
-  const fighter1Tensor = tf.tensor([
-    fighter1.age,
-    fighter1.heightCm,
-    fighter1.reachCm,
-    fighter1.weightKg,
-    fighter1.experienceYears,
-  ]);
-
-  const fighter2Tensor = tf.tensor([
-    fighter2.age,
-    fighter2.heightCm,
-    fighter2.reachCm,
-    fighter2.weightKg,
-    fighter2.experienceYears,
-  ]);
-
-  const distanceTensor = tf.sub(fighter1Tensor, fighter2Tensor).square().sum();
-  const distance = (await distanceTensor.data())[0];
-  const matchScore = 1 / (1 + distance!);
-  return matchScore;
-}
-
 async function main() {
   try {
     await kafkaClient.createTopic(MATCHMAKING);
+
     const consumer = kafkaClient
       .getInstance()
       .consumer({ groupId: 'mm-group' });
@@ -117,7 +138,6 @@ async function main() {
       autoCommit: true,
       eachMessage: async ({ topic, partition, message }) => {
         console.log(`Message received: ${message.value?.toString()}`);
-
         const data = JSON.parse(message.value?.toString() || '{}');
         const userId = data.userId;
 

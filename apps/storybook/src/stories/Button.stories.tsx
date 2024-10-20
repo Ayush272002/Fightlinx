@@ -133,7 +133,7 @@ export const Custom: Story = {
 
 // AllVariants story with different Tailwind colors
 export const AllVariants: Story = {
-  render: (args) => (
+  render: (args: any) => (
     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
       <Button
         {...args}
