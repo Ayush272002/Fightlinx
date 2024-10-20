@@ -192,6 +192,7 @@ const updateUser = async (req: Request, res: Response) => {
         weightKg: Number(weightKg),
         fightingStyle: fightingStyle,
         gym: gym,
+        updatedAt: new Date(),
       },
     });
 
@@ -284,4 +285,69 @@ const quickStats = async (req: Request, res: Response) => {
   }
 };
 
-export { createUser, signin, updateUser, getProfile, quickStats };
+const getUpcomingMatches = async (req: Request, res: Response) => {
+  try {
+    const userId = req.body.userId;
+
+    if (!userId) {
+      return res.status(403).json({
+        message: 'Unauthorized',
+      });
+    }
+
+    const fighter = await prisma.fighter.findFirst({
+      where: {
+        userId: userId,
+      },
+    });
+
+    if (!fighter) {
+      return res.status(404).json({
+        message: 'Fighter profile not found',
+      });
+    }
+
+    const upcomingMatches = await prisma.upcomingMatch.findMany({
+      where: {
+        OR: [
+          {
+            fighter1Id: fighter.id,
+          },
+          {
+            fighter2Id: fighter.id,
+          },
+        ],
+      },
+      include: {
+        fighter1: true,
+        fighter2: true,
+      },
+    });
+
+    const formattedMatches = upcomingMatches.map((match) => ({
+      matchId: match.id,
+      status: match.status,
+      matchDate: match.matchDate,
+      fighter1Name: match.fighter1.name,
+      fighter2Name: match.fighter2.name,
+    }));
+
+    return res.status(200).json({
+      data: formattedMatches,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({
+      message: 'Internal server error',
+    });
+  }
+};
+
+export {
+  createUser,
+  signin,
+  updateUser,
+  getProfile,
+  quickStats,
+  getUpcomingMatches,
+};

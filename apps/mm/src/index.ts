@@ -112,7 +112,7 @@ async function initiateMatchmaking(userId: number) {
         fighter1Id: fighter.id,
         fighter2Id: bestMatch.id,
         status: 'pending',
-        matchDate: new Date(),
+        matchDate: new Date(new Date().setDate(new Date().getDate() + 7)),
       },
     });
     console.log(

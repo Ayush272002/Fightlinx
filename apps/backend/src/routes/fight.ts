@@ -9,6 +9,6 @@ const router = Router();
 
 router.get('/recentActivity', authMiddleware, getRecentFights);
 
-router.post('/matchmaking', initiateMatchmaking);
+router.post('/matchmaking', authMiddleware, initiateMatchmaking);
 
 export const fightRouter = router;

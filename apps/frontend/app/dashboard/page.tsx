@@ -52,21 +52,6 @@ const matchCandidates = [
   { name: 'Tom Wilson', compatibilityScore: 82 },
 ];
 
-const upcomingMatches = [
-  {
-    opponent: 'Mike Johnson',
-    date: '2023-07-15',
-    time: '20:00',
-    location: 'Las Vegas Arena',
-  },
-  {
-    opponent: 'Sarah Lee',
-    date: '2023-08-02',
-    time: '19:30',
-    location: 'New York Stadium',
-  },
-];
-
 interface FighterProfile {
   name: string;
   age: number;
@@ -98,6 +83,14 @@ interface QuickStats {
   // matchmakingStatus: number,
 }
 
+interface UpcomingMatch {
+  matchId: number;
+  status: string;
+  matchDate: string;
+  fighter1Name: string;
+  fighter2Name: string;
+}
+
 export default function Dashboard() {
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -109,6 +102,8 @@ export default function Dashboard() {
     // upcomingMatches: 0,
     // matchmakingStatus: 0,
   });
+
+  const [upcomingMatches, setUpcomingMatches] = useState<UpcomingMatch[]>([]);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -162,6 +157,7 @@ export default function Dashboard() {
       }
     };
 
+    fetchUpcomingMatches();
     fetchProfile();
     getRecentActivity();
     fetchQuickStats();
@@ -172,7 +168,6 @@ export default function Dashboard() {
   };
 
   const handleSaveProfile = async (updatedProfile: FighterProfile) => {
-    setProfile(updatedProfile);
     setIsEditProfileOpen(false);
 
     try {
@@ -192,12 +187,11 @@ export default function Dashboard() {
         {
           payload,
         },
-        {
-          headers: { Authorization: `Bearer ${localStorage.getItem('jwt')}` },
-        }
+        { withCredentials: true }
       );
 
       if (response.status === 200) {
+        setProfile(updatedProfile);
         toast.success('Updated successful');
       } else {
         toast.error(response.data.error || 'Something went wrong');
@@ -209,6 +203,50 @@ export default function Dashboard() {
         toast.error('An error occurred during update. Please try again.');
       }
       console.error('Update error:', error);
+    }
+  };
+
+  const handleMatchMaking = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/api/v1/fight/matchmaking`,
+        {},
+        { withCredentials: true }
+      );
+
+      if (response.status === 202) {
+        toast.success('Matchmaking initiated successfully');
+      } else {
+        toast.error(response.data.error || 'Something went wrong');
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.error) {
+        toast.error(error.response.data.error);
+      } else {
+        toast.error('An error occurred during matchmaking. Please try again.');
+      }
+      console.error('Update error:', error);
+    }
+  };
+
+  const fetchUpcomingMatches = async () => {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/v1/user/getUpcomingMatches`,
+        { withCredentials: true }
+      );
+
+      if (response.status === 200) {
+        const matches = response.data.data;
+        setUpcomingMatches(matches);
+      } else {
+        toast.error(
+          response.data.message || 'Failed to fetch upcoming matches'
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching upcoming matches:', error);
+      toast.error('An error occurred while fetching upcoming matches.');
     }
   };
 
@@ -321,11 +359,7 @@ export default function Dashboard() {
                           <strong>{activity.fighter2.name}</strong> -
                           <strong className="text-green-400">
                             {' '}
-                            {activity.winner === 'Fighter 1'
-                              ? activity.fighter1.name
-                              : activity.winner === 'Fighter 2'
-                                ? activity.fighter2.name
-                                : activity.winner}
+                            {activity.winner}
                           </strong>{' '}
                           won by{' '}
                           <span className="text-red-400">
@@ -467,7 +501,10 @@ export default function Dashboard() {
               <CardTitle className="text-red-400">Find a Match</CardTitle>
             </CardHeader>
             <CardContent>
-              <Button className="bg-red-600 hover:bg-red-700 rounded">
+              <Button
+                className="bg-red-600 hover:bg-red-700 rounded"
+                onClick={handleMatchMaking}
+              >
                 Start Matchmaking
               </Button>
             </CardContent>
@@ -515,20 +552,24 @@ export default function Dashboard() {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="text-red-400">Opponent</TableHead>
-                    <TableHead className="text-red-400">Date</TableHead>
-                    <TableHead className="text-red-400">Time</TableHead>
-                    <TableHead className="text-red-400">Location</TableHead>
+                    <TableHead className="text-red-400">Match ID</TableHead>
+                    <TableHead className="text-red-400">Fighter 1</TableHead>
+                    <TableHead className="text-red-400">Fighter 2</TableHead>
+                    <TableHead className="text-red-400">Match Date</TableHead>
+                    <TableHead className="text-red-400">Status</TableHead>
                     <TableHead className="text-red-400">Action</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {upcomingMatches.map((match, index) => (
-                    <TableRow key={index}>
-                      <TableCell>{match.opponent}</TableCell>
-                      <TableCell>{match.date}</TableCell>
-                      <TableCell>{match.time}</TableCell>
-                      <TableCell>{match.location}</TableCell>
+                  {upcomingMatches.map((match) => (
+                    <TableRow key={match.matchId}>
+                      <TableCell>{match.matchId}</TableCell>
+                      <TableCell>{match.fighter1Name}</TableCell>
+                      <TableCell>{match.fighter2Name}</TableCell>
+                      <TableCell>
+                        {new Date(match.matchDate).toLocaleString()}
+                      </TableCell>
+                      <TableCell>{match.status}</TableCell>
                       <TableCell>
                         <Button className="bg-red-600 hover:bg-red-700 rounded">
                           View Details

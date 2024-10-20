@@ -96,9 +96,9 @@ export function EditProfilePopup({
                   <SelectValue placeholder="Select gender" />
                 </SelectTrigger>
                 <SelectContent className="bg-gray-800 text-white border-red-600 rounded">
-                  <SelectItem value="male">Male</SelectItem>
-                  <SelectItem value="female">Female</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="Male">Male</SelectItem>
+                  <SelectItem value="Female">Female</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
