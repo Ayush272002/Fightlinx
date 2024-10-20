@@ -214,7 +214,8 @@ export default function Dashboard() {
         { withCredentials: true }
       );
 
-      if (response.status === 202) {
+      if (response.status === 200) {
+        fetchUpcomingMatches();
         toast.success('Matchmaking initiated successfully');
       } else {
         toast.error(response.data.error || 'Something went wrong');

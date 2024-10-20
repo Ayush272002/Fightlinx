@@ -12,10 +12,11 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@repo/db": "*",
     "@repo/kafka": "*",
     "@repo/topics": "*",
-    "@repo/db": "*",
     "@tensorflow/tfjs": "^4.21.0",
-    "esbuild": "^0.24.0"
+    "esbuild": "^0.24.0",
+    "redis": "^4.7.0"
   }
 }

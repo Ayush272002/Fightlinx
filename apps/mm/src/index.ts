@@ -1,7 +1,8 @@
 import kafkaClient from '@repo/kafka/client';
-import { MATCHMAKING } from '@repo/topics/topic';
+import { FAILURE, MATCHMAKING, SUCCESS } from '@repo/topics/topic';
 import prisma from '@repo/db/client';
 import * as tf from '@tensorflow/tfjs';
+import { RedisManager } from './utils/RedisManager';
 
 /*
 Matchmaking Process Details:
@@ -106,6 +107,8 @@ async function initiateMatchmaking(userId: number) {
   const fighterTensor = getFighterTensor(fighter);
   const bestMatch = knnMatch(fighterTensor, validOpponents);
 
+  const redisManager = RedisManager.getInstance();
+
   if (bestMatch) {
     await prisma.upcomingMatch.create({
       data: {
@@ -115,10 +118,13 @@ async function initiateMatchmaking(userId: number) {
         matchDate: new Date(new Date().setDate(new Date().getDate() + 7)),
       },
     });
+
+    await redisManager.publish(MATCHMAKING, SUCCESS);
     console.log(
       `Matchmaking successful: Fighter1 (${fighter.name}) vs Fighter2 (${bestMatch.name})`
     );
   } else {
+    await redisManager.publish(MATCHMAKING, FAILURE);
     console.log('No suitable match found');
   }
 }

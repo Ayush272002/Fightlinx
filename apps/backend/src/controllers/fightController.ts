@@ -1,7 +1,8 @@
 import prisma from '@repo/db/client';
 import kafkaClient from '@repo/kafka/client';
-import { MATCHMAKING } from '@repo/topics/topic';
+import { FAILURE, MATCHMAKING, SUCCESS } from '@repo/topics/topic';
 import { Request, Response } from 'express';
+import { RedisManager } from '../utils/RedisManager';
 
 const getRecentFights = async (req: Request, res: Response) => {
   try {
@@ -110,7 +111,20 @@ const initiateMatchmaking = async (req: Request, res: Response) => {
       messages: [{ value: JSON.stringify({ userId: userId }) }],
     });
 
-    return res.status(202).json({ message: 'Matchmaking initiated' });
+    const redisManager = RedisManager.getInstance();
+    redisManager.subscribe(MATCHMAKING, (message) => {
+      // console.log(`Received message from Redis: ${message}`);
+
+      if (message === SUCCESS) {
+        return res.status(200).json({
+          message: 'Matchmaking done',
+        });
+      } else if (message === FAILURE) {
+        return res.status(500).json({
+          message: 'Matchmaking failed',
+        });
+      }
+    });
   } catch (error) {
     console.error(error);
     return res.status(500).json({
