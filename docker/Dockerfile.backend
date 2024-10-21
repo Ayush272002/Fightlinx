@@ -10,7 +10,7 @@ COPY packages ./packages
 
 RUN npm install
 
-RUN npm run build:backend
+RUN npm run build
 RUN npm run db:generate
 
 EXPOSE 8000

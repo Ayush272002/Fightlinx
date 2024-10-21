@@ -10,7 +10,7 @@ COPY packages ./packages
 
 RUN npm install
 
-RUN npm run build:mm
+RUN npm run build
 
 RUN npm run db:generate
 
