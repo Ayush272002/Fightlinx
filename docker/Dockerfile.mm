@@ -10,8 +10,8 @@ COPY packages ./packages
 
 RUN npm install
 
+RUN npm run db:generate
 RUN npm run build
 
-RUN npm run db:generate
 
 CMD ["npm", "run", "start:mm"]
