@@ -112,14 +112,18 @@ const initiateMatchmaking = async (req: Request, res: Response) => {
     });
 
     const redisManager = RedisManager.getInstance();
+    let responseSent = false;
     redisManager.subscribe(MATCHMAKING, (message) => {
       // console.log(`Received message from Redis: ${message}`);
+      if (responseSent) return;
 
       if (message === SUCCESS) {
+        responseSent = true;
         return res.status(200).json({
           message: 'Matchmaking done',
         });
       } else if (message === FAILURE) {
+        responseSent = true;
         return res.status(500).json({
           message: 'Matchmaking failed',
         });

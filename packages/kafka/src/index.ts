@@ -19,14 +19,14 @@ class KafkaSingleton {
     if (!KafkaSingleton.instance) {
       KafkaSingleton.instance = new Kafka({
         brokers: [kafkaUri],
-        // ssl: {
-        //   rejectUnauthorized: false,
-        // },
-        // sasl: {
-        //   mechanism: 'scram-sha-256',
-        //   username: process.env.KAFKA_USERNAME as string,
-        //   password: process.env.KAFKA_PASSWORD as string,
-        // },
+        ssl: {
+          rejectUnauthorized: false,
+        },
+        sasl: {
+          mechanism: 'scram-sha-256',
+          username: process.env.KAFKA_USERNAME as string,
+          password: process.env.KAFKA_PASSWORD as string,
+        },
         logLevel: logLevel.ERROR,
       });
     }

@@ -16,6 +16,7 @@
     "@repo/kafka": "*",
     "@repo/topics": "*",
     "@tensorflow/tfjs": "^4.21.0",
+    "dotenv": "^16.4.5",
     "esbuild": "^0.24.0",
     "redis": "^4.7.0"
   }

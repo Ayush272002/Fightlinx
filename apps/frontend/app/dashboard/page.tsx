@@ -104,6 +104,7 @@ export default function Dashboard() {
   });
 
   const [upcomingMatches, setUpcomingMatches] = useState<UpcomingMatch[]>([]);
+  const [disabledButton, setDisabledButton] = useState(false);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -208,6 +209,7 @@ export default function Dashboard() {
 
   const handleMatchMaking = async () => {
     try {
+      setDisabledButton(true);
       const response = await axios.post(
         `${API_BASE_URL}/api/v1/fight/matchmaking`,
         {},
@@ -220,11 +222,14 @@ export default function Dashboard() {
       } else {
         toast.error(response.data.error || 'Something went wrong');
       }
+      setDisabledButton(false);
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
+        setDisabledButton(false);
       } else {
         toast.error('An error occurred during matchmaking. Please try again.');
+        setDisabledButton(false);
       }
       console.error('Update error:', error);
     }
@@ -381,7 +386,11 @@ export default function Dashboard() {
           </Card>
 
           <div className="flex space-x-4">
-            <Button className="bg-red-600 hover:bg-red-700 rounded">
+            <Button
+              className="bg-red-600 hover:bg-red-700 rounded"
+              onClick={handleMatchMaking}
+              disabled={disabledButton}
+            >
               Find a Match
             </Button>
             <Button
@@ -505,6 +514,7 @@ export default function Dashboard() {
               <Button
                 className="bg-red-600 hover:bg-red-700 rounded"
                 onClick={handleMatchMaking}
+                disabled={disabledButton}
               >
                 Start Matchmaking
               </Button>
