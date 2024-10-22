@@ -343,6 +343,24 @@ const getUpcomingMatches = async (req: Request, res: Response) => {
   }
 };
 
+const logout = async (req: Request, res: Response) => {
+  try {
+    res.clearCookie('jwt', {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'strict',
+    });
+    return res.status(200).json({
+      message: 'Logged out successfully',
+    });
+  } catch (error) {
+    console.error('Signout error:', error);
+    return res.status(500).json({
+      message: 'An error occurred during logout',
+    });
+  }
+};
+
 export {
   createUser,
   signin,
@@ -350,4 +368,5 @@ export {
   getProfile,
   quickStats,
   getUpcomingMatches,
+  logout,
 };

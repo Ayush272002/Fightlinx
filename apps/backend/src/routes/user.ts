@@ -3,6 +3,7 @@ import {
   createUser,
   getProfile,
   getUpcomingMatches,
+  logout,
   quickStats,
   signin,
   updateUser,
@@ -14,6 +15,8 @@ const router = Router();
 router.post('/signup', createUser);
 
 router.post('/signin', signin);
+
+router.post('/logout', logout);
 
 router.post('/update', authMiddleware, updateUser);
 

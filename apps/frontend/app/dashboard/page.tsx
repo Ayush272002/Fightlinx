@@ -10,7 +10,15 @@ import {
   Tooltip,
   ResponsiveContainer,
 } from 'recharts';
-import { Activity, Users, Calendar, TrendingUp, Edit } from 'lucide-react';
+import {
+  Activity,
+  Users,
+  Calendar,
+  TrendingUp,
+  Edit,
+  LogOut,
+  Zap,
+} from 'lucide-react';
 import {
   Button,
   Card,
@@ -20,6 +28,7 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  Spinner,
   Table,
   TableBody,
   TableCell,
@@ -34,6 +43,10 @@ import {
 import { EditProfilePopup } from 'components/EditProfilePopup';
 import axios from 'axios';
 import { toast } from 'react-toastify';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
+import { Heatmap } from 'components/heatmap';
+import { Performance } from 'components/Performance';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -92,6 +105,7 @@ interface UpcomingMatch {
 }
 
 export default function Dashboard() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('overview');
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
   const [profile, setProfile] = useState<FighterProfile | null>(null);
@@ -105,64 +119,84 @@ export default function Dashboard() {
 
   const [upcomingMatches, setUpcomingMatches] = useState<UpcomingMatch[]>([]);
   const [disabledButton, setDisabledButton] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/user/profile`,
-          { withCredentials: true }
-        );
+    const fetchData = async () => {
+      setLoading(true);
 
-        if (response.status === 200) {
-          const profileData = response.data.data;
-          // console.log('Profile data:', profileData);
+      try {
+        const [
+          profileResponse,
+          recentActivityResponse,
+          quickStatsResponse,
+          upcomingMatchesResponse,
+        ] = await Promise.all([
+          axios.get(`${API_BASE_URL}/api/v1/user/profile`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/v1/fight/recentActivity`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/v1/user/quickStats`, {
+            withCredentials: true,
+          }),
+          axios.get(`${API_BASE_URL}/api/v1/user/getUpcomingMatches`, {
+            withCredentials: true,
+          }),
+        ]);
+
+        if (profileResponse.status === 200) {
+          const profileData = profileResponse.data.data;
           setProfile(profileData);
         }
-      } catch (e) {
-        console.error('Profile fetch error:', e);
-      }
-    };
-
-    const getRecentActivity = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/fight/recentActivity`,
-          { withCredentials: true }
-        );
-
-        if (response.status === 200) {
-          const activityData = response.data.data;
+        if (recentActivityResponse.status === 200) {
+          const activityData = recentActivityResponse.data.data;
           setRecentActivity(activityData);
-          // console.log('Recent activity:', activityData);
         }
-      } catch (e) {
-        console.error('Recent activity fetch error:', e);
-      }
-    };
-
-    const fetchQuickStats = async () => {
-      try {
-        const response = await axios.get(
-          `${API_BASE_URL}/api/v1/user/quickStats`,
-          { withCredentials: true }
-        );
-
-        if (response.status === 200) {
-          const stats = response.data.data;
-          // console.log('Quick stats:', stats);
+        if (quickStatsResponse.status === 200) {
+          const stats = quickStatsResponse.data.data;
           setQuickStats(stats);
         }
-      } catch (e) {
-        console.error('Quick stats fetch error:', e);
+        if (upcomingMatchesResponse.status === 200) {
+          const matches = upcomingMatchesResponse.data.data;
+          setUpcomingMatches(matches);
+        }
+      } catch (error) {
+        router.push('/signin');
+        toast.error(
+          'An error occurred while fetching data. Please signin again.'
+        );
+        console.error('Fetch error:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchUpcomingMatches();
-    fetchProfile();
-    getRecentActivity();
-    fetchQuickStats();
+    fetchData();
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      const res = await axios.post(
+        `${API_BASE_URL}/api/v1/user/logout`,
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      if (res.status === 200) {
+        router.push('/signin');
+        toast.success('Logged out successfully');
+      } else {
+        toast.error('Something went wrong');
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error('An error occurred during logout. Please try again.');
+    }
+  };
 
   const handleEditProfile = () => {
     setIsEditProfileOpen(true);
@@ -256,11 +290,33 @@ export default function Dashboard() {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-black text-white p-8 flex justify-center items-center">
+        <Spinner className="w-8 h-8 text-red-600" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white p-8">
-      <h1 className="text-4xl font-bold mb-8 text-red-600">
-        FightLinx Dashboard
-      </h1>
+      <div
+        className="flex justify-between items-center mb-8 cursor-pointer"
+        onClick={() => router.push('/')}
+      >
+        <h1 className="text-4xl font-bold text-red-600 flex items-center">
+          <Zap className="h-8 w-8 text-red-500 mt-2" />
+          <span className="ml-2">FightLinx</span>
+        </h1>
+
+        <Button
+          className="bg-red-600 hover:bg-red-700 text-white rounded flex items-center gap-2"
+          onClick={handleLogout}
+        >
+          <span>Logout</span>
+          <LogOut className="h-4 w-4" />
+        </Button>
+      </div>
 
       <Tabs
         value={activeTab}
@@ -453,56 +509,7 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="bg-gray-900 border-red-600 rounded">
-            <CardHeader>
-              <CardTitle className="text-red-400">
-                Performance Insights
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer
-                config={{
-                  wins: {
-                    label: 'Wins',
-                    color: '#ff4136',
-                  },
-                  losses: {
-                    label: 'Losses',
-                    color: '#0074d9',
-                  },
-                }}
-                className="h-[300px]"
-              >
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={performanceData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                    <XAxis
-                      dataKey="month"
-                      tick={{ fill: '#fff' }}
-                      label={{
-                        value: 'Months',
-                        position: 'insideBottom',
-                        offset: -5,
-                        fill: '#fff',
-                      }}
-                    />
-                    <YAxis
-                      tick={{ fill: '#fff' }}
-                      label={{
-                        value: 'Count',
-                        angle: -90,
-                        position: 'insideLeft',
-                        fill: '#fff',
-                      }}
-                    />
-                    <ChartTooltip content={<ChartTooltipContent />} />
-                    <Bar dataKey="wins" fill="#ff4136" />
-                    <Bar dataKey="losses" fill="#0074d9" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </ChartContainer>
-            </CardContent>
-          </Card>
+          <Performance />
         </TabsContent>
 
         <TabsContent value="matchmaking" className="space-y-4">
@@ -595,28 +602,7 @@ export default function Dashboard() {
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4">
-          <Card className="bg-gray-900 border-red-600 rounded">
-            <CardHeader>
-              <CardTitle className="text-red-400">
-                Performance Metrics
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>
-                Detailed performance metrics and analytics will be displayed
-                here.
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gray-900 border-red-600 rounded">
-            <CardHeader>
-              <CardTitle className="text-red-400">Leaderboard</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p>Top fighters leaderboard will be displayed here.</p>
-            </CardContent>
-          </Card>
+          <Heatmap />
         </TabsContent>
       </Tabs>
 
