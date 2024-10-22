@@ -13,11 +13,7 @@
     },
     "ui#build": {
       "dependsOn": ["^build"],
-      "outputs": ["dist/**", "packages/ui/dist/**"]
-    },
-    "storybook#build": {
-      "dependsOn": ["^build"],
-      "outputs": ["apps/storybook/dist/**", "apps/storybook/storybook-static/**"]
+      "outputs": ["dist/**"]
     },
     "lint": {
       "dependsOn": ["^lint"]

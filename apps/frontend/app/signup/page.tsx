@@ -126,7 +126,9 @@ export default function SignUp() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-red-700 placeholder-red-300 text-red-100 rounded-t-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm bg-black bg-opacity-50"
                 placeholder="Full name"
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setName(e.target.value)
+                }
               />
             </div>
             <div>
@@ -141,7 +143,9 @@ export default function SignUp() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-red-700 placeholder-red-300 text-red-100 focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm bg-black bg-opacity-50"
                 placeholder="Email address"
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setEmail(e.target.value)
+                }
               />
             </div>
             <div>
@@ -156,7 +160,9 @@ export default function SignUp() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-red-700 placeholder-red-300 text-red-100 focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm bg-black bg-opacity-50"
                 placeholder="Password"
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPassword(e.target.value)
+                }
               />
             </div>
             <div>
@@ -171,7 +177,9 @@ export default function SignUp() {
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-red-700 placeholder-red-300 text-red-100 rounded-b-md focus:outline-none focus:ring-red-500 focus:border-red-500 focus:z-10 sm:text-sm bg-black bg-opacity-50"
                 placeholder="Confirm password"
-                onChange={(e) => setPasswordConfirm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  setPasswordConfirm(e.target.value)
+                }
               />
             </div>
           </div>

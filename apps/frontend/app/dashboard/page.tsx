@@ -44,7 +44,6 @@ import { EditProfilePopup } from 'components/EditProfilePopup';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import { useRouter } from 'next/navigation';
-import Cookies from 'js-cookie';
 import { Heatmap } from 'components/heatmap';
 import { Performance } from 'components/Performance';
 
