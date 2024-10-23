@@ -41,3 +41,33 @@ jobs:
         run: |
           docker pull ayush272002/fightlinx-mm:latest
           docker images | grep ayush272002/fightlinx-mm
+
+      - name: Deploy to AWS EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            sudo docker pull ayush272002/fightlinx-backend:latest
+            sudo docker pull ayush272002/fightlinx-mm:latest
+            sudo docker rm backend || true
+            sudo docker rm mm || true
+            sudo docker run -d \
+              --name backend \
+              -p 8000:8000 \
+              -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e KAFKA_URI="${{ secrets.KAFKA_URI }}" \
+              -e KAFKA_USERNAME="${{ secrets.KAFKA_USERNAME }}" \
+              -e KAFKA_PASSWORD="${{ secrets.KAFKA_PASSWORD }}" \
+              -e REDIS_URL="${{ secrets.REDIS_URL }}" \
+              ayush272002/fightlinx-backend:latest
+            sudo docker run -d \
+              --name mm \
+              -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
+              -e KAFKA_URI="${{ secrets.KAFKA_URI }}" \
+              -e KAFKA_USERNAME="${{ secrets.KAFKA_USERNAME }}" \
+              -e KAFKA_PASSWORD="${{ secrets.KAFKA_PASSWORD }}" \
+              -e REDIS_URL="${{ secrets.REDIS_URL }}" \
+              ayush272002/fightlinx-mm:latest
