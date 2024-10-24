@@ -5,6 +5,7 @@ import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user';
 import { fightRouter } from './routes/fight';
 import client from 'prom-client';
+import { metricsMiddleware } from './middlewares/metrics';
 dotenv.config();
 
 const app = express();
@@ -27,6 +28,7 @@ app.use(
 );
 app.use(express.json());
 app.use(cookieParser());
+app.use(metricsMiddleware);
 
 const PORT = process.env.PORT || 8000;
 
