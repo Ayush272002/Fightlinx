@@ -2,6 +2,8 @@
 
 This is a MMA website on which fighters can register and look for a match. The matchmaking algorithm runs a KNN algorithm for matchmaking.
 
+Deployed version - https://fightlinx.vercel.app
+
 ## Tech Stack
 
 #### Frontend
@@ -56,21 +58,44 @@ When the user signs-up and register for a fight the request is sent to the backe
 
 I've chosen this architecture so that I'm not processing and running a big algorithm on the primaru backend also by following this architecture it can be easily scaled up horizontally by running multiple instances of the worker(matchmaker) easily. Which would be cost efficient rather than scaling up the whole primary backend.
 
-### Clone
+### Running the project locally
+
+Follow this [video](https://drive.google.com/file/d/1XDMOdq0sURbioo83CQBIiLfxFdpVI_82/view?usp=drive_link) to understand more better
+
 
 To clone the repo run
 
 ```shell
-git clone https://github.com/Ayush272002/Turborepo-Template.git
-cd template
+git clone https://github.com/Ayush272002/Fightlinx.git
+cd Fightlinx
 npm i
-```
-
-### Build
-
-To build all apps and packages, run the following command:
-
-```shell
-cd template
 npm run build
 ```
+After that go to `apps/frontend` and create a .env file over there and paste this inside that
+`NEXT_PUBLIC_API_BASE_URL=http://localhost:8000`
+
+Now run the frontend
+
+go to the frontend directory of the project and run
+```shell
+cd app/frontend
+npm run dev
+```
+
+Now for running the backend and the mm, paste the given `docker-compose.yml` in the root dir of project and run
+
+```shell
+docker-compose up
+```
+
+## Contributing
+
+Contributions are welcome! If you have suggestions for new features, bug fixes, or improvements, please fork the repository and submit a pull request. For major changes, please open an issue first to discuss what you would like to change.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contact
+
+If you have any questions or suggestions, please feel free to contact.
