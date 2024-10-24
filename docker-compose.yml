@@ -5,10 +5,10 @@ services:
     image: ayush272002/fightlinx-backend:latest
     environment:
       - PORT=8000
-      - JWT_SECRET=secret
+      - JWT_SECRET=
       - DATABASE_URL=
       - ALLOWED_ORIGINS=http://localhost:3000
-      - KAFKA_URI=
+      - KAFKA_URI=fightlinx-
       - KAFKA_USERNAME=
       - KAFKA_PASSWORD=
       - REDIS_URL=
@@ -19,7 +19,7 @@ services:
     image: ayush272002/fightlinx-mm:latest
     environment:
       - DATABASE_URL=
-      - KAFKA_URI=
+      - KAFKA_URI=fightlinx-
       - KAFKA_USERNAME=
       - KAFKA_PASSWORD=
       - REDIS_URL=
