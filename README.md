@@ -1,6 +1,29 @@
-# Turborepo Template
+# Fightlinx
 
-This is a Turborepo template.
+This is a MMA website on which fighters can register and look for a match. The matchmaking algorithm runs a KNN algorithm for matchmaking.
+
+## Tech Stack
+
+#### Frontend
+- Next.js
+- React.js
+- Storybook
+- ShadCN
+- MUI
+- Typescript
+
+#### Backend
+- Node.js
+- Express.js
+- Tensorflow.js
+- Kafka
+- Redis Pub/Sub
+- Prisma ORM (for postgreSQL db)
+
+#### DevOps
+- Docker
+- Github CI/CD
+- AWS
 
 ## What's inside?
 
@@ -8,29 +31,30 @@ This Turborepo includes the following packages/apps:
 
 ### Apps and Packages
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `storybook`: [React.js](https://react.dev/) app with storybbok initialised, it can be used as a react app but more specifically wanted it to test components independently using storybook
-- `backend`: [Express.js](https://expressjs.com/) app and [esbuild](https://esbuild.github.io/) as the bundler
-- `@repo/db and @repo/db_serverless`: both are initialised with [prisma](https://www.prisma.io/) the serverless can be used with hono or any other serverless function, and both of them exposes the prisma client.
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications which includes [shadcn](https://ui.shadcn.com/) and [MUI - material ui](https://mui.com/material-ui/getting-started/) and [tsup](https://tsup.egoist.dev/) as the bundler
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
-- `@repo/tailwind-config`: `tailwind.config.js`s used throughout the monorepo
+- `frontend`: a [Next.js](https://nextjs.org/) app for the fighters to register and look for opponents.
+- `admin`: another [Next.js](https://nextjs.org/) app for the admin to manage the fights (not completed it).
+- `storybook`: [React.js](https://react.dev/) app with storybbok initialised, it can be used as a react app but more specifically wanted it to test components independently using storybook.
+- `backend`: [Express.js](https://expressjs.com/) app and [esbuild](https://esbuild.github.io/) as the bundler.
+- `mm`: Runs the machine learning algorith (KNN) for find a perfect match of the fighter.
+- `@repo/db`: Initialised with [prisma](https://www.prisma.io/) and it exposes the prisma client.
+- `@repo/kafka`: Intialised with [kafkajs](https://kafka.js.org/) and it exposes the kafka client singleton.
+- `@repo/ui`: a stub React component library shared by both `frontend` and `admin` applications which includes [shadcn](https://ui.shadcn.com/) and [MUI - material ui](https://mui.com/material-ui/getting-started/) and [tsup](https://tsup.egoist.dev/) as the bundler.
+- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`).
+- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo.
+- `@repo/tailwind-config`: `tailwind.config.js`s used throughout the monorepo.
+- `@repo/zodTypes`: exports the zodTypes.
+- `@repo/topics`: exports the topics/channel for kafka and redis.
+- `docker`: contains the dockerfile for the apps, which will be build in the ci/cd pipeline and then be deployed to my dockerhub and ec2 instance.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Workflow
 
-### Utilities
+This is how the workflow is designed
 
-This Turborepo has some additional tools already setup for you:
+![workflow](images/workflow.png)
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-- [Shadcn](https://ui.shadcn.com/) for ui design and components
-- [MUI - material ui](https://mui.com/material-ui/getting-started/) for ui design and components
-- [Husky](https://typicode.github.io/husky/) for pre-commit hook
-- [Lint-Staged](https://www.npmjs.com/package/lint-staged) to run linters against staged git files
+When the user signs-up and register for a fight the request is sent to the backend and then the backend validates the user and its figter profile. Once, validated it sends the matchmaking request in the kafka queue and subscribes on the `matchmaking` channel on the redi pub/sub which is taken out by a matchmaking processor running independently. The matchmaking algorithm uses tensorflow.js and runs a KNN algorithm to find the perfect match for the user which wanted a fight. And once the match is found the matchmaking processor puts it into the database and sends a `SUCESS` message to the backend on the `matchmaking` channel. Once the backend receives this messege it returns a 200 status code the frontend.
+
+I've chosen this architecture so that I'm not processing and running a big algorithm on the primaru backend also by following this architecture it can be easily scaled up horizontally by running multiple instances of the worker(matchmaker) easily. Which would be cost efficient rather than scaling up the whole primary backend.
 
 ### Clone
 
@@ -50,42 +74,3 @@ To build all apps and packages, run the following command:
 cd template
 npm run build
 ```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-```shell
-cd template
-npm run dev
-```
-
-### Remote Caching
-
-Turborepo can use a technique known as [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup), then enter the following commands:
-
-```shell
-cd template
-npx turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```shell
-npx turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turbo.build/repo/docs/core-concepts/monorepos/running-tasks)
-- [Caching](https://turbo.build/repo/docs/core-concepts/caching)
-- [Remote Caching](https://turbo.build/repo/docs/core-concepts/remote-caching)
-- [Filtering](https://turbo.build/repo/docs/core-concepts/monorepos/filtering)
-- [Configuration Options](https://turbo.build/repo/docs/reference/configuration)
-- [CLI Usage](https://turbo.build/repo/docs/reference/command-line-reference)

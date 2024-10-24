@@ -6,89 +6,20 @@ services:
     environment:
       - PORT=8000
       - JWT_SECRET=secret
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fightlinx
+      - DATABASE_URL=
       - ALLOWED_ORIGINS=http://localhost:3000
-      - KAFKA_URI=kafka:9092
-      - KAFKA_BROKERS=kafka:9092
-      - REDIS_URL=redis://redis:6379
+      - KAFKA_URI=
+      - KAFKA_USERNAME=
+      - KAFKA_PASSWORD=
+      - REDIS_URL=
     ports:
       - '8000:8000'
-    depends_on:
-      kafka:
-        condition: service_healthy
-    networks:
-      - app-network
 
   mm:
     image: ayush272002/fightlinx-mm:latest
-    depends_on:
-      kafka:
-        condition: service_healthy
     environment:
-      - PORT=8000
-      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/fightlinx
-      - KAFKA_URI=kafka:9092
-      - KAFKA_BROKERS=kafka:9092
-      - REDIS_URL=redis://redis:6379
-    networks:
-      - app-network
-
-  postgres:
-    image: postgres:latest
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=fightlinx
-    ports:
-      - '5432:5432'
-    networks:
-      - app-network
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:latest
-    ports:
-      - '6379:6379'
-    networks:
-      - app-network
-
-  kafka:
-    image: confluentinc/cp-kafka:latest
-    hostname: kafka
-    ports:
-      - "9092:9092"
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
-      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
-      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
-    networks:
-      - app-network
-    depends_on:
-      - zookeeper
-    healthcheck:
-      test: ["CMD-SHELL", "kafka-topics --bootstrap-server kafka:9092 --list"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
-
-  zookeeper:
-    image: confluentinc/cp-zookeeper:latest
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    networks:
-      - app-network
-
-networks:
-  app-network:
-    driver: bridge
-
-volumes:
-  postgres-data:
+      - DATABASE_URL=
+      - KAFKA_URI=
+      - KAFKA_USERNAME=
+      - KAFKA_PASSWORD=
+      - REDIS_URL=

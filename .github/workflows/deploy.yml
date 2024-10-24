@@ -49,15 +49,19 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           key: ${{ secrets.SSH_KEY }}
           script: |
-            sudo docker pull ayush272002/fightlinx-backend:latest
-            sudo docker pull ayush272002/fightlinx-mm:latest
             sudo docker stop backend || true
             sudo docker rm backend || true
             sudo docker stop mm || true
             sudo docker rm mm || true
+            sudo docker system prune -af
+            sudo docker volume prune -f
+            sudo docker pull ayush272002/fightlinx-backend:latest
+            sudo docker pull ayush272002/fightlinx-mm:latest
             sudo docker run -d \
               --name backend \
               -p 8000:8000 \
+              -e PORT=8000 \
+              -e ALLOWED_ORIGINS="https://fightlinx.vercel.app" \
               -e JWT_SECRET="${{ secrets.JWT_SECRET }}" \
               -e DATABASE_URL="${{ secrets.DATABASE_URL }}" \
               -e KAFKA_URI="${{ secrets.KAFKA_URI }}" \
