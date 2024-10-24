@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
 import { userRouter } from './routes/user';
 import { fightRouter } from './routes/fight';
+import client from 'prom-client';
 dotenv.config();
 
 const app = express();
@@ -31,6 +32,12 @@ const PORT = process.env.PORT || 8000;
 
 app.use('/api/v1/user', userRouter);
 app.use('/api/v1/fight', fightRouter);
+
+app.get('/metrics', async (req: Request, res: Response) => {
+  const metrics = await client.register.metrics();
+  res.set('Content-Type', client.register.contentType);
+  res.end(metrics);
+});
 
 //global catch
 app.use(function (err: Error, req: Request, res: Response, next: NextFunction) {
