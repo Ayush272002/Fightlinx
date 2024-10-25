@@ -4,6 +4,10 @@ This is a MMA website on which fighters can register and look for a match. The m
 
 Deployed version - https://fightlinx.vercel.app
 
+Test credentials for signin
+email - amanda.nunes@fighter.com
+password - Test@1234
+
 ## Tech Stack
 
 #### Frontend
